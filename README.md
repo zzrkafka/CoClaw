@@ -1,10 +1,16 @@
 # CoClaw
 
 A **frozen** LLM agent that solves combinatorial-optimization (COP) routing instances
-end-to-end and **reverse-induces a reusable, typed skill library** from its own
-`(solution, exact-gap)` pairs. The model weights never change — what evolves is the
-**skill library (code)**, curated by an **exact optimization objective** (LKH gap),
-not by an LLM judge.
+end-to-end and **reverse-induces a reusable library of typed operators**, composed into
+**strategies**, from its own `(solution, exact-gap)` pairs. The model weights never
+change; what evolves is the **library**, curated by an **exact optimization objective**
+(LKH gap), not by an LLM judge.
+
+> **Terminology.** A **skill** is a top-level **strategy** — an executable **`scaffold`**
+> composing **operators** (the typed code atoms: `construct` / `order` / `local_search` /
+> `repair` / `destroy` / `diagnose` / `debug`), plus a declarative **`plan`** (whose
+> injection is config-gated — see below). **Lessons** are cross-cutting rules. The code
+> keeps the identifiers `Skill` / `SkillLibrary` for any library entry.
 
 The scientific question: does that judgment **compound** (the library is genuinely
 reused and its value rises across a stream of instances) or **collapse** (the library is
@@ -15,8 +21,8 @@ dead weight and all gains come from per-instance self-correction)? CoClaw is bui
 
 Two loops that must not be conflated: the **harness** — a *fixed*, problem-agnostic
 **inner** engine that drives one instance to a submitted solution — and the **evolve
-loop**, the **outer** loop that grows and curates the skill library across instances. The
-harness is frozen *code*; what evolves is the skill library, not the engine.
+loop**, the **outer** loop that grows and curates the library across instances. The
+harness is frozen *code*; what evolves is the library, not the engine.
 
 - **Harness — the fixed inner engine** (`agent/solver.py`, `agent/harness.py`, `sandbox/`)
   — for each instance a multi-step **CodeAct** agent runs in a stateful sandbox: observe →
@@ -25,16 +31,16 @@ harness is frozen *code*; what evolves is the skill library, not the engine.
   and captures a **hang traceback** (SIGALRM stack dump) instead of silently failing; the
   harness — not the agent — measures the exact LKH gap (the agent never sees it).
 - **Evolve loop** (`agent/evolve.py`) — **agentic induction**: a planner reflects on
-  solve/teacher trajectories and proposes which typed skills to add; each is authored in a
-  focused context — **breadth** (diverse personas, grounded-picked) then **depth** (a
+  solve/teacher trajectories and proposes which typed operators to add; each is authored in
+  a focused context — **breadth** (diverse personas, grounded-picked) then **depth** (a
   separate *debugger* critic reads the execution evidence and returns a minimal patch).
   Curation is a **step-wise grounded judge with partial credit**, and the judge is the
   **exact LKH gap on a dev set — never an LLM**.
-- **Typed skills** (`skills/schema.py`) — a top-level **`strategy`** that orchestrates
-  others and carries a declarative **`plan`**, over typed **operators**: the construct step
-  is atomized into `diagnose/detect → order → build` (each earns independent credit), plus
-  `local_search`, `repair`, `destroy`, and a `debug` operator. Leave-one-out **lesion**
-  attribution (`analysis/lesion.py`) gives each one an exact marginal value.
+- **Atomized operators & lesion credit** (`skills/schema.py`, `analysis/lesion.py`) — the
+  monolithic constructor is split into `detect → order → build` so each **operator** is
+  judged and credited independently (alongside `local_search`, `repair`, `destroy`,
+  `debug`). Leave-one-out **lesion** attribution then assigns each operator an exact
+  marginal value; dead weight is pruned.
 - **Lessons + supervisor** (`agent/lessons.py`) — a minimal generic rule seed, plus
   **agent-distilled lessons** from grounded failures, plus a static `lint` for known
   anti-patterns. Specific bug rules are *not* hand-fed; the system rediscovers them.
@@ -45,7 +51,7 @@ harness is frozen *code*; what evolves is the skill library, not the engine.
   (`probe`).
 
 > **Config-gated layer.** An explicit controller **playbook**, injection of a strategy's
-> **`plan`** into the solve context, and a **debug-skill recovery** seam
+> **`plan`** into the solve context, and a **debug**-operator recovery seam
 > (`agent/playbook.py`, `agent/harness.py`) are implemented but **off by default** in
 > `configs/default_hard.yaml` (the profile behind the current results) and **on** in
 > `configs/default_hard_v2.yaml`, so old-vs-new can be run as a clean A/B.
@@ -109,7 +115,7 @@ frozen — no training, no GPU; cost is tokens only.
 | `lcar/` | LCAR testbed generator + structural oracle |
 | `agent/` | solver, evolve, featurize, lessons, playbook, harness, seeds, growth |
 | `sandbox/` | stateful CodeAct executor + primitives |
-| `skills/` | typed skill schema + library |
+| `skills/` | skill (strategy) + operator schema; library |
 | `solvers/` | LKH-3, exact (Held–Karp), reference gaps |
 | `analysis/` | lesion, curation, qd, discriminative, probe, curves |
 | `experiments/` | arms, run_arm, gates, records |
