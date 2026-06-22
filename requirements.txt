@@ -1,0 +1,13 @@
+# CoClaw core Python dependencies (install inside the WSL2 venv; see scripts/setup_wsl.sh)
+numpy>=1.26
+scipy>=1.11
+scikit-learn>=1.3
+pyyaml>=6.0
+jinja2>=3.1
+requests>=2.31
+ortools>=9.8            # fallback / cross-validation reference solver (spec 4.2)
+
+# --- Optional (install on demand) ---------------------------------------------
+# gurobipy>=11.0         # exact small-n ATSP ILP for gate 3 (spec 4.2); needs academic license (grbgetkey)
+# sentence-transformers  # embedding-based skill retrieval (spec 7.3); pulls torch (~GB).
+#                        # The library<20 "return all active" fallback covers the pilot, so this is deferred.

@@ -1,0 +1,70 @@
+# F_hard "v2 regime": same testbed as default_hard.yaml, but every improvement-plan switch (§1-§4)
+# turned ON. Use this to A/B the new mechanisms against the hard_split-reproducing baseline:
+#   baseline (reproduces hard_split):  --config configs/default_hard.yaml
+#   v2 (plan + curation + growth + discriminative):  --config configs/default_hard_v2.yaml
+# Everything above the `harness:` block is byte-identical to default_hard.yaml.
+model:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.7
+  max_tokens: 4096
+  api_key_env: DEEPSEEK_API_KEY
+
+lcar:
+  K: 6
+  alpha: 0.2
+  beta: 30.0
+  sigma_z: 0.1
+  sigma_x: 0.1
+  eps_sigma: 0.05
+  cost_scale: 10000
+  pi: [2, 0, 4, 1, 5, 3]
+  cheap_cycle: [0, 1, 2, 3, 4, 5]
+  G_cheap: 0.1
+  G_exp: 1.0
+  g_mode: random
+  g_seed: 7
+
+instances:
+  n_main: 60
+  stream_len: 20
+  heldout_len: 50
+  transfer_len: 30
+  dev_window: 20
+  seed: 1234
+
+budgets:
+  max_action_steps: 8
+  eval_budget: null
+  evolve_every_m: 1
+  retrieve_top_k: 6
+  dev_eval_k: 3
+  accept_threshold: 0.005
+
+gates:
+  toolkit_gap_min: 0.25
+  oracle_gap_max: 0.03
+  lkh_exact_tol: 0.0
+
+problem:
+  family: F                    # §6 provenance: skills induced here are stamped origin_family=F
+harness:
+  inject_plans: true           # §1.3 surface retrieved strategy plans in the solve context
+  use_playbook: true           # §1.5 inject the general controller playbook into the solve prompt
+  debug_recovery: true         # §1.4 offer a retrieved debug skill when the agent stalls/regresses
+library:
+  seed_strategy: true          # §2.1 seed a thin detect->order->build->improve strategy scaffold
+  fill_holes: true             # §2.2 author exactly the operators the seed strategy's holes need
+curation:
+  prune: true                  # §3.3 lesion-prune dead/harmful skills each round
+  tenure_k: 3                  # §3.2 rounds a new skill is shielded from pruning
+  prune_mv_eps: 0.001          # |marginal| below this == "dead weight" (≈0)
+  prune_reuse_max: 0.34        # reuse_rate at/below this counts as "low reuse"
+  leave_one_in: true           # §3.4 also credit operators in-context (weak-alone/strong-combo)
+  qd_niche: true               # §3.5 keep one best variant per behavioral niche, merge the rest
+discriminative:
+  enabled: true                # §4 use a high-discrimination instance subset for credit
+  persist_gap_matrix: true     # §4.1 record the skill x instance gap matrix + discrimination scores
+  pool_k: 12                   # dev POOL to select from (judge still uses dev_eval_k of these)
+  reselect_every: 5            # amortize: recompute the discriminative subset every N rounds
+  anchor_frac: 0.34            # §4.2 fraction reserved as a stable anti-Goodhart anchor

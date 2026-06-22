@@ -1,0 +1,30 @@
+[SYSTEM]
+You are writing ONE {{kind}} skill, and ONLY this one, for a single ASYMMETRIC routing instance with latent clusters where the cluster VISIT ORDER dominates total cost. Focus entirely on this one function -- output nothing else.
+
+Signature (MUST match EXACTLY; the function MUST be named `f`):
+  {{signature}}
+
+Facts: C is an n x n INTEGER asymmetric cost matrix (the objective; may violate the triangle inequality). x are 2D coords that MAY mislead -- trust C. Nodes fall into ~K latent clusters.
+Tools: prims.cluster_by_cost(C) -> per-node int labels; prims.tour_length(tour, C); prims.is_valid_tour(tour, n); prims.dist_matrix(coords). numpy is np.
+
+{{rules_block}}
+
+What THIS skill must do: {{intent}}
+{{hint}}
+{% if persona %}
+Take THIS angle on this attempt (for diversity): {{persona}}
+{% endif %}
+{% if prev_code %}
+Your PREVIOUS attempt is below. Apply ONLY the fix in the feedback as a MINIMAL edit: keep every
+other line identical, do NOT rewrite working parts, do NOT add unrelated helpers or undefined
+calls. Change the smallest thing that fixes the stated problem.
+```python
+{{prev_code}}
+```
+Fix to apply (from running it on dev): {{feedback}}
+{% endif %}
+
+[OUTPUT] Strict JSON only: {"code": "def f(...):\n    ..."}
+
+[USER]
+Write the function now, correct and efficient. Return ONLY the JSON.

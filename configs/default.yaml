@@ -1,0 +1,52 @@
+model:
+  provider: deepseek           # deepseek | anthropic | openai  <- swap backend here only
+  model: deepseek-chat
+  temperature: 0.7
+  max_tokens: 4096
+  api_key_env: DEEPSEEK_API_KEY
+  # swap examples:
+  #   {provider: anthropic, model: claude-sonnet-4-6, api_key_env: ANTHROPIC_API_KEY}
+  #   {provider: openai,    model: gpt-4.1,           api_key_env: OPENAI_API_KEY}
+
+lcar:                          # see spec section 3; family F parameters
+  K: 4
+  alpha: 1.0                   # metric term (euclidean on z) weight
+  beta: 5.0                    # structure term (G transition) weight  -- difficulty knob (1)
+  sigma_z: 0.1                 # within-type scatter
+  sigma_x: 0.1                 # within visible-cluster scatter
+  eps_sigma: 0.05              # cost noise
+  cost_scale: 10000            # integer scale (LKH/Gurobi/agent share one integer matrix)
+  pi: [2, 0, 3, 1]             # shuffle: visible cluster v -> cost-type pi[v]  -- difficulty knob (2)
+  cheap_cycle: [0, 1, 2, 3]    # cheap forward cycle over the type order in G
+  G_cheap: 0.1
+  G_exp: 1.0
+
+family_F_prime:                # transfer family: change pi and cheap cycle
+  pi: [1, 3, 0, 2]
+  cheap_cycle: [0, 2, 3, 1]
+
+instances:
+  n_main: 50                   # main scale (LKH near-optimal in ms)
+  n_plumb: 20                  # plumbing the pipeline
+  n_stress: 100                # stress / generalization
+  stream_len: 150              # evolution instance-stream length
+  heldout_len: 50              # held-out test, same family F
+  transfer_len: 30             # F_prime transfer test
+  dev_window: 20               # sliding dev window for the grounded judge
+  seed: 1234
+
+budgets:
+  max_action_steps: 12         # CodeAct action-step budget per instance (replaces "rewrite count")
+  eval_budget: null            # null = unlimited; an int caps cost-lookups per solve (F4 regime:
+                               # forces structure-exploitation over brute force). Set via --eval-budget.
+  evolve_every_m: 1            # run evolution/curation every m instances
+  retrieve_top_k: 6            # skills retrieved per instance
+  dev_eval_k: 6                # dev subsample size for grounded judge end-to-end re-solve
+  accept_threshold: 0.005      # grounded curation: accept only if mean dev gap delta <= -threshold
+                               # (>0 so a no-op skill, delta=0, is REJECTED; requires real improvement)
+  # budget envelope ~ $100-300 / 1-2 weeks; TODO(advisor): total token/$ cap
+
+gates:                         # spec section 4.3 validity gates
+  toolkit_gap_min: 0.25        # toolkit-baseline gap MUST exceed this (trap is hard enough)
+  oracle_gap_max: 0.03         # structure-oracle gap MUST be below this (structure is exploitable)
+  lkh_exact_tol: 0.0           # LKH length must == Gurobi exact (small-n sample)

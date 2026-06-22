@@ -1,0 +1,70 @@
+# F_hard: deceptive cluster-TSP testbed (for QUALITY compounding).
+# The cluster-visit order is a hard small TSP (random asymmetric inter-cluster cost), and
+# beta>>alpha so the order dominates cost. Node-level 2-opt cannot reorder clusters -> stuck
+# (~28%); the induced cluster-TSP solver -> near-oracle (~2%). No eval budget needed: the
+# separation is structural, not compute-bound.
+model:
+  provider: deepseek
+  model: deepseek-chat
+  temperature: 0.7
+  max_tokens: 4096
+  api_key_env: DEEPSEEK_API_KEY
+
+lcar:
+  K: 6
+  alpha: 0.2                   # small metric term
+  beta: 30.0                   # large structure term -> cluster order dominates
+  sigma_z: 0.1
+  sigma_x: 0.1
+  eps_sigma: 0.05
+  cost_scale: 10000
+  pi: [2, 0, 4, 1, 5, 3]
+  cheap_cycle: [0, 1, 2, 3, 4, 5]   # ignored when g_mode=random
+  G_cheap: 0.1
+  G_exp: 1.0
+  g_mode: random               # deceptive random inter-cluster cost (a hard K-cluster TSP)
+  g_seed: 7
+
+instances:
+  n_main: 60                   # 6 clusters x ~10 nodes
+  stream_len: 20
+  heldout_len: 50
+  transfer_len: 30
+  dev_window: 20
+  seed: 1234
+
+budgets:
+  max_action_steps: 8
+  eval_budget: null            # no budget -- self-discovery is structurally stuck, not compute-capped
+  evolve_every_m: 1
+  retrieve_top_k: 6
+  dev_eval_k: 3
+  accept_threshold: 0.005
+
+gates:
+  toolkit_gap_min: 0.25
+  oracle_gap_max: 0.03
+  lkh_exact_tol: 0.0
+
+# §1-§4 improvement-plan switches. ALL default to the hard_split-reproducing behavior; the
+# default_hard_v2.yaml profile turns them on so old-vs-new arms are a clean A/B.
+harness:
+  inject_plans: false          # §1.3 surface retrieved strategy plans in the solve context
+  use_playbook: false          # §1.5 inject the general controller playbook into the solve prompt
+  debug_recovery: false        # §1.4 offer a retrieved debug skill when the agent stalls/regresses
+library:
+  seed_strategy: false         # §2.1 seed a thin detect->order->build->improve strategy scaffold
+  fill_holes: false            # §2.2 author exactly the operators the seed strategy's holes need
+curation:
+  prune: false                 # §3.3 lesion-prune dead/harmful skills each round
+  tenure_k: 3                  # §3.2 rounds a new skill is shielded from pruning
+  prune_mv_eps: 0.001          # |marginal| below this == "dead weight" (≈0)
+  prune_reuse_max: 0.34        # reuse_rate at/below this counts as "low reuse"
+  leave_one_in: false          # §3.4 also credit operators in-context (weak-alone/strong-combo)
+  qd_niche: false              # §3.5 keep one best variant per behavioral niche, merge the rest
+discriminative:
+  enabled: false               # §4 use a high-discrimination instance subset for credit
+  persist_gap_matrix: false    # §4.1 record the skill x instance gap matrix + discrimination scores
+  pool_k: 12                   # dev POOL to select from (judge still uses dev_eval_k of these)
+  reselect_every: 5            # amortize: recompute the discriminative subset every N rounds
+  anchor_frac: 0.34            # §4.2 fraction reserved as a stable anti-Goodhart anchor

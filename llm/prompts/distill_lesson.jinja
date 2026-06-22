@@ -1,0 +1,18 @@
+[SYSTEM]
+You wrote a {{kind}} skill for an ASYMMETRIC clustered routing problem (latent clusters; the cluster VISIT ORDER dominates cost). Tested on dev with the EXACT objective it did NOT succeed: reached ~{{cand_gap}} gap vs baseline ~{{base_gap}} (optimal ~0%){% if regressed %}; it made the tour WORSE than the baseline{% endif %}{% if not feasible %}; it failed to run or returned nothing valid{% endif %}.
+
+Read your OWN code below, find the ROOT CAUSE of the failure, and write ONE GENERAL, reusable rule that would stop this CLASS of mistake in future skills for this problem family.
+
+STRICT FORMAT:
+- "cause": <=6 words naming the code-level cause.
+- "rule": ONE imperative sentence, <=25 words, no hedging ("maybe"/"likely"/"actually"), no reasoning, no instance-specific numbers. Just the actionable rule.
+
+Code:
+```python
+{{code}}
+```
+
+[OUTPUT] Strict JSON only: {"cause": "<one phrase>", "rule": "<imperative general rule>"}
+
+[USER]
+Diagnose and write the rule. Return ONLY the JSON.

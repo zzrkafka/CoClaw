@@ -1,0 +1,41 @@
+[SYSTEM]
+You are refining your SKILL LIBRARY by reverse-inducing from your own solutions. You are shown BETTER and WORSE solutions (as ordered tours with their costs) across recent instances. Infer WHY the better ones win and WHAT your current skills miss, then propose concrete, typed skill operations.
+
+SKILL CODE REQUIREMENTS (skills that do not match are silently unusable):
+- The function MUST be named exactly `f` and match its kind's signature EXACTLY:
+    diagnose:     def f(tour, x, C, prims) -> dict         # DETECT structure: {"labels":[per-node cluster id], "k":K}
+    order:        def f(struct, C, prims) -> list[int]     # cluster ids in CHEAP directed visit order
+    construct:    def f(n, x, C, prims, struct=None, order=None) -> list[int]   # BUILD a tour from struct+order
+    local_search: def f(tour, C, prims) -> list[int]      # an improved tour (same node set)
+    repair:       def f(partial, n, C, prims) -> list[int]
+    destroy:      def f(tour, C, prims, k) -> tuple        # (partial_tour, removed_nodes)
+    strategy:     def f(n, x, C, skills, prims) -> list[int]   # may call skills["<id>"](...)
+    debug:        def f(tour, C, prims) -> list[int]      # RECOVER a stuck/failed tour into a better one
+- Read a cost as C[i][j] or C[i, j] (integer). Helpers: prims.tour_length(tour, C), prims.is_valid_tour(tour, n), prims.dist_matrix(coords). numpy is available as np.
+- Self-contained pure function (numpy available as np). Must be GENERAL across instances of this family: infer any structure from C at run time (e.g. cluster nodes by cost, derive thresholds from C's own distribution) -- do NOT hard-code instance-specific magic numbers.
+- CORRECTNESS: a construct/strategy MUST return a permutation of ALL of range(n), each node exactly once (a common bug is dropping the start node). Before returning, verify with prims.is_valid_tour(tour, n) and append any missing nodes. A local_search/repair MUST return the SAME node set it received.
+- If your skill claims to exploit structure (e.g. clusters), the code must ACTUALLY USE that structure in its decisions -- not merely compute it and then ignore it.
+
+[OUTPUT] Strict JSON: {"analysis": str, "ops": [{"op":"add|modify|merge|prune","kind":"diagnose|order|construct|local_search|repair|destroy|strategy|debug","target_id": str|null,"name":str,"description_nl":str,"plan":str,"contract":{"inputs":[str],"requires":[str],"preserves":[str],"produces":[str]},"code":"<python matching the kind signature>","claimed_improvement":str}]}
+For a `strategy` op, also fill `plan`: a SHORT imperative playbook (1-4 lines: what to do, what to avoid, why) shown to the solver to steer which skills it calls and in what order. Leave `plan` as "" for bare operators (diagnose/order/construct/local_search/repair/destroy). The plan is declarative guidance; the `code` scaffold is what gets graded by the exact objective.
+
+[USER]
+Recent instances (each: better vs worse solution as ordered node sequences with per-edge costs, plus the cost structure observable in C):
+{{trajectories_block}}
+Current library (id : kind : description : reuse_rate : marginal_value):
+{{library_summary}}
+How your PREVIOUS proposals scored on dev (learn from this -- do NOT repeat what was rejected):
+{{curation_feedback}}
+
+{{lessons_block}}
+
+Propose 1-3 ops that would most lower FUTURE gap. Skills must be GENERAL (reusable across instances of this family), not memorized to one instance.
+IMPORTANT -- DECOMPOSE the constructor into separate typed ATOMS; never one monolith. Each atom is judged and credited INDEPENDENTLY, so a buggy step cannot sink the good ones (partial credit), and we can measure WHICH atom carries the value. The atoms and their data flow:
+  (1) `diagnose` (DETECT): labels = prims.cluster_by_cost(C); return {"labels": per-node cluster ids, "k": K}.
+  (2) `order`: from those labels, build the K x K inter-cluster cost and SOLVE the small Travelling-Salesman over the FEW clusters (brute-force all orderings) -> the cheap DIRECTED visit order (a list of cluster ids). THIS is the key reusable skill -- plain 2-opt over nodes can NEVER fix a bad cluster order.
+  (3) `construct` (BUILD): given `struct` and `order`, assemble the tour -- visit clusters in `order`, nearest-neighbour within each. Do NOT cluster or solve the order here.
+  (4) `local_search`: a SHORT bounded improvement (optional).
+Propose the missing atoms as separate ops in ONE round (a `diagnose`, an `order`, a `construct`). The harness composes detect -> order -> build automatically; you do NOT need a `strategy` to glue them.
+TWO LEVELS OF FIX (prefer the first): (L1) if a step is MISSING or WEAK, add/replace the OPERATOR of that kind -- the common, cheap fix. (L2) ONLY if the overall PLAN STRUCTURE is wrong, modify the `strategy`, kept as a THIN dispatcher that calls operators by kind -- never inline a monolithic solver inside a strategy (it is rejected).
+EFFICIENCY IS MANDATORY: every skill must finish well within the cost budget -- BOUND all loops (e.g. a fixed small number of passes), do NOT run local search to convergence, and prefer reading the structure of C once over repeated full scans. An eval-hungry skill will be rejected (it blows the budget).
+Return ONLY the JSON.
