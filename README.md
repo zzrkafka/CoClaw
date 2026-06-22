@@ -13,28 +13,42 @@ dead weight and all gains come from per-instance self-correction)? CoClaw is bui
 
 ## How it works
 
-- **Solve loop** (`agent/solver.py`, `sandbox/`) — for each instance a multi-step
-  **CodeAct** agent runs in a stateful sandbox: it observes, emits code actions, checks
-  feasibility, measures the true objective, and submits a rolling-best tour. The sandbox
-  **auto-repairs** invalid tours (`sanitize_tour`) and captures a **hang traceback**
-  (SIGALRM stack dump) instead of silently failing.
+Two loops that must not be conflated: the **harness** — a *fixed*, problem-agnostic
+**inner** engine that drives one instance to a submitted solution — and the **evolve
+loop**, the **outer** loop that grows and curates the skill library across instances. The
+harness is frozen *code*; what evolves is the skill library, not the engine.
+
+- **Harness — the fixed inner engine** (`agent/solver.py`, `agent/harness.py`, `sandbox/`)
+  — for each instance a multi-step **CodeAct** agent runs in a stateful sandbox: observe →
+  act → check feasibility → measure the true objective → **recover** on error → track the
+  rolling-best tour → submit. The sandbox **auto-repairs** invalid tours (`sanitize_tour`)
+  and captures a **hang traceback** (SIGALRM stack dump) instead of silently failing; the
+  harness — not the agent — measures the exact LKH gap (the agent never sees it).
 - **Evolve loop** (`agent/evolve.py`) — **agentic induction**: a planner reflects on
-  solve/teacher trajectories and proposes which typed operators to add; each is authored
-  in a focused context — **breadth** (diverse personas, grounded-picked) then **depth**
-  (a separate trace-reading *debugger* critic returns a minimal patch). Curation is a
-  **step-wise grounded judge with partial credit**, and the judge is the **exact LKH gap
-  on a dev set — never an LLM**.
-- **Typed operators** (`skills/schema.py`) — the construct step is atomized into
-  `diagnose/detect → order → build` so each atom earns independent credit, plus
-  `local_search`, `repair`, `destroy`, and a `debug` skill. Leave-one-out **lesion**
-  attribution (`analysis/lesion.py`) assigns each operator an exact marginal value.
+  solve/teacher trajectories and proposes which typed skills to add; each is authored in a
+  focused context — **breadth** (diverse personas, grounded-picked) then **depth** (a
+  separate *debugger* critic reads the execution evidence and returns a minimal patch).
+  Curation is a **step-wise grounded judge with partial credit**, and the judge is the
+  **exact LKH gap on a dev set — never an LLM**.
+- **Typed skills** (`skills/schema.py`) — a top-level **`strategy`** that orchestrates
+  others and carries a declarative **`plan`**, over typed **operators**: the construct step
+  is atomized into `diagnose/detect → order → build` (each earns independent credit), plus
+  `local_search`, `repair`, `destroy`, and a `debug` operator. Leave-one-out **lesion**
+  attribution (`analysis/lesion.py`) gives each one an exact marginal value.
 - **Lessons + supervisor** (`agent/lessons.py`) — a minimal generic rule seed, plus
   **agent-distilled lessons** from grounded failures, plus a static `lint` for known
   anti-patterns. Specific bug rules are *not* hand-fed; the system rediscovers them.
 - **Analysis / curation stack** (`analysis/`) — leave-one-out value (`lesion`),
-  two-dimensional reuse×marginal pruning with merges (`curation`), quality-diversity
-  niches (`qd`), a discriminative instance set (`discriminative`), and transfer/scale
-  probes that yield `frac_general` (`probe`).
+  two-dimensional reuse×marginal curation that prunes dead weight and flags merges
+  (`curation`), quality-diversity niche dedup (`qd`), a discriminative instance set
+  (`discriminative`), and post-hoc transfer/scale probes that yield `frac_general`
+  (`probe`).
+
+> **Config-gated layer.** An explicit controller **playbook**, injection of a strategy's
+> **`plan`** into the solve context, and a **debug-skill recovery** seam
+> (`agent/playbook.py`, `agent/harness.py`) are implemented but **off by default** in
+> `configs/default_hard.yaml` (the profile behind the current results) and **on** in
+> `configs/default_hard_v2.yaml`, so old-vs-new can be run as a clean A/B.
 
 ## Testbeds
 
