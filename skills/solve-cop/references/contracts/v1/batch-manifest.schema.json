@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COClaw batch manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "run_id", "family", "time_limit_sec", "instances"],
+  "properties": {
+    "version": {"const": 1},
+    "run_id": {"type": "string"},
+    "family": {"type": "string"},
+    "time_limit_sec": {"type": "number", "exclusiveMinimum": 0},
+    "instances": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["id", "path", "seed", "time_limit_sec"],
+        "properties": {
+          "id": {"type": "string"},
+          "path": {"type": "string"},
+          "seed": {"type": "integer", "minimum": 0},
+          "time_limit_sec": {"type": "number", "exclusiveMinimum": 0}
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,12 @@
+{
+  "name": "explicit4",
+  "type": "TSP",
+  "edge_weight_type": "EXPLICIT",
+  "node_ids": ["0", "1", "2", "3"],
+  "distance_matrix": [
+    [0, 2, 9, 10],
+    [2, 0, 6, 4],
+    [9, 6, 0, 8],
+    [10, 4, 8, 0]
+  ]
+}

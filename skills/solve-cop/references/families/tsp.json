@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "family": "tsp",
+  "aliases": [
+    "traveling salesman problem",
+    "traveling salesperson problem",
+    "travelling salesman problem"
+  ],
+  "status": "initializing",
+  "status_reason": "Parser and validator are active, but a new cold-solver effectiveness result is required after the runtime simplification.",
+  "objective": {"sense": "min", "name": "tour_length"},
+  "guide": "references/families/tsp.md",
+  "parser": "scripts/families/tsp/parser.py",
+  "validator": "scripts/families/tsp/validator.py",
+  "formats": [
+    {
+      "id": "coclaw-tsp-json-v1",
+      "description": "Symmetric TSP JSON using EUC_2D coordinates or a complete explicit matrix.",
+      "extensions": [".json"]
+    },
+    {
+      "id": "tsplib-tsp-euc2d-v1",
+      "description": "TSPLIB TYPE TSP with EUC_2D coordinates.",
+      "extensions": [".tsp"]
+    }
+  ],
+  "semantics": {
+    "requires": [
+      "one closed Hamiltonian cycle",
+      "every declared node is visited exactly once",
+      "symmetric edge costs",
+      "minimize total cost including the closing edge"
+    ],
+    "rejects": [
+      "optional or prize-collecting visits",
+      "multiple routes or vehicles",
+      "capacity, time-window, pickup-delivery, or other routing constraints",
+      "asymmetric edge costs"
+    ]
+  }
+}

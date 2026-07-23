@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COClaw phenotype request",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "id", "side", "family", "family_root", "evaluator_root", "manifest", "budget", "requested_evidence", "blind"],
+  "properties": {
+    "version": {"const": 1},
+    "id": {"type": "string"},
+    "side": {"enum": ["champion", "candidate"]},
+    "family": {"type": "string"},
+    "family_root": {"type": "string"},
+    "evaluator_root": {"type": "string"},
+    "manifest": {"type": "string"},
+    "budget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["time_sec", "tokens"],
+      "properties": {
+        "time_sec": {"type": "number", "exclusiveMinimum": 0},
+        "tokens": {"type": "integer", "minimum": 1}
+      }
+    },
+    "requested_evidence": {"type": "array", "items": {"type": "string"}},
+    "blind": {"const": true}
+  }
+}

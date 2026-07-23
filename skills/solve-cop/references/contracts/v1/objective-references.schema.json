@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COClaw objective references",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "family", "values"],
+  "properties": {
+    "version": {"const": 1},
+    "family": {"type": "string"},
+    "values": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "value"],
+        "properties": {
+          "kind": {"enum": ["optimum", "bks", "bound"]},
+          "value": {"type": "number"}
+        }
+      }
+    }
+  }
+}

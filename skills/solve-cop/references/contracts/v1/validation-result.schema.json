@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COClaw validation result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "instance_id", "status", "feasible", "violations"],
+  "properties": {
+    "version": {"const": 1},
+    "instance_id": {"type": "string"},
+    "status": {"enum": ["valid", "invalid", "no_candidate", "error"]},
+    "feasible": {"type": ["boolean", "null"]},
+    "objective": {"type": "number"},
+    "reported_objective": {"type": ["number", "null"]},
+    "violations": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COClaw normalized instance",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "family", "instance_id", "objective", "data", "metadata"],
+  "properties": {
+    "version": {"const": 1},
+    "family": {"type": "string"},
+    "instance_id": {"type": "string"},
+    "objective": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sense", "name"],
+      "properties": {
+        "sense": {"enum": ["min", "max"]},
+        "name": {"type": "string"}
+      }
+    },
+    "data": {"type": "object"},
+    "metadata": {"type": "object"}
+  }
+}

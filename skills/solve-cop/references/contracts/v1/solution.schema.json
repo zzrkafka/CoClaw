@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COClaw solution",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "instance_id", "status"],
+  "properties": {
+    "version": {"const": 1},
+    "instance_id": {"type": "string"},
+    "status": {"enum": ["candidate", "no_candidate", "error", "interrupted"]},
+    "objective": {"type": "number"},
+    "solution": {"type": "object"},
+    "telemetry": {"type": "object"},
+    "message": {"type": "string"}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"status": {"const": "candidate"}}},
+      "then": {"required": ["solution"]}
+    }
+  ]
+}

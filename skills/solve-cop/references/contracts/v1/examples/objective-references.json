@@ -1,0 +1,5 @@
+{
+  "version": 1,
+  "family": "tsp",
+  "values": {"tiny5": {"kind": "optimum", "value": 44}}
+}

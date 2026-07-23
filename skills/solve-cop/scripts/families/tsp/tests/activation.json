@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "family": "tsp",
+  "status": "initializing",
+  "checks": {
+    "parser_self_test": "pass",
+    "validator_self_test": "pass",
+    "cold_solver_effectiveness": "pending"
+  },
+  "note": "Historical runtime-specific evidence was removed during simplification. Activate only after a fresh blinded solve succeeds."
+}

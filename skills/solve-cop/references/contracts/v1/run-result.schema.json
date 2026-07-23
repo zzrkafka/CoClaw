@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COClaw run result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "trial_id", "family", "objective_sense", "evaluation_kind", "status", "batch", "evaluator", "solver", "instances", "summary"],
+  "properties": {
+    "version": {"const": 1},
+    "trial_id": {"type": "string"},
+    "family": {"type": "string"},
+    "objective_sense": {"enum": ["min", "max"]},
+    "evaluation_kind": {"enum": ["cheap", "full"]},
+    "status": {"enum": ["valid", "partial", "error"]},
+    "batch": {"type": "object"},
+    "evaluator": {"type": "object"},
+    "solver": {
+      "type": "object",
+      "required": ["path", "sha256", "returncode", "wall_time_sec"],
+      "properties": {
+        "path": {"type": "string"},
+        "sha256": {"type": "string"},
+        "returncode": {"type": ["integer", "null"]},
+        "wall_time_sec": {"type": "number"}
+      }
+    },
+    "instances": {"type": "array"},
+    "summary": {"type": "object"}
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "run_id": "tiny-batch",
+  "family": "tsp",
+  "time_limit_sec": 10,
+  "instances": [
+    {"id": "tiny5", "path": "instances/tiny5.json", "seed": 0, "time_limit_sec": 5}
+  ]
+}

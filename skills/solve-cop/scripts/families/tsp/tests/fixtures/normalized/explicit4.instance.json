@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "family": "tsp",
+  "instance_id": "explicit4",
+  "objective": {"sense": "min", "name": "tour_length"},
+  "data": {
+    "representation": "distance_matrix",
+    "edge_weight_type": "EXPLICIT",
+    "dimension": 4,
+    "node_ids": ["0", "1", "2", "3"],
+    "distance_matrix": [[0, 2, 9, 10], [2, 0, 6, 4], [9, 6, 0, 8], [10, 4, 8, 0]]
+  },
+  "metadata": {"name": "explicit4", "format": "coclaw-tsp-json-v1"}
+}

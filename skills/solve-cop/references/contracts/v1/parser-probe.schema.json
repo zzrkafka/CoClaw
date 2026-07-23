@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "COClaw parser probe",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "family", "status", "format", "observations", "message"],
+  "properties": {
+    "version": {"const": 1},
+    "family": {"type": "string"},
+    "status": {"enum": ["compatible", "incompatible", "ambiguous", "error"]},
+    "format": {"type": ["string", "null"]},
+    "observations": {"type": "object"},
+    "message": {"type": "string"}
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "family": "tsp",
+  "instance_id": "triangle",
+  "objective": {"sense": "min", "name": "tour_length"},
+  "data": {
+    "representation": "coordinates_2d",
+    "edge_weight_type": "EUC_2D",
+    "dimension": 3,
+    "node_ids": ["1", "2", "3"],
+    "coordinates": [[0, 0], [3, 0], [0, 4]]
+  },
+  "metadata": {"name": "triangle", "format": "tsplib-tsp-euc2d-v1"}
+}

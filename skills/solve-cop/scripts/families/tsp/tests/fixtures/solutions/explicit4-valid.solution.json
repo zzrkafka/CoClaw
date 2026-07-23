@@ -1,0 +1,8 @@
+{
+  "version": 1,
+  "instance_id": "explicit4",
+  "status": "candidate",
+  "objective": 23,
+  "solution": {"tour": ["0", "1", "3", "2"]},
+  "telemetry": {}
+}

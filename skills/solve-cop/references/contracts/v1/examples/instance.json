@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "family": "tsp",
+  "instance_id": "tiny5",
+  "objective": {"sense": "min", "name": "tour_length"},
+  "data": {
+    "representation": "coordinates_2d",
+    "edge_weight_type": "EUC_2D",
+    "node_ids": ["a", "b", "c", "d", "e"],
+    "coordinates": [[0, 0], [10, 0], [10, 10], [0, 10], [5, 5]]
+  },
+  "metadata": {"name": "tiny5"}
+}

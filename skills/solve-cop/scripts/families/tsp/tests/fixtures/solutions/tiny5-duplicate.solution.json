@@ -1,0 +1,6 @@
+{
+  "version": 1,
+  "instance_id": "tiny5",
+  "status": "candidate",
+  "solution": {"tour": ["a", "b", "b", "d", "e"]}
+}

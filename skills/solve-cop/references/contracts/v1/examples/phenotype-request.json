@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "id": "r1-candidate",
+  "side": "candidate",
+  "family": "tsp",
+  "family_root": "candidate/solve-cop",
+  "evaluator_root": "candidate/solve-cop",
+  "manifest": "batch.json",
+  "budget": {"time_sec": 120, "tokens": 80000},
+  "requested_evidence": ["validator-clean shortened run"],
+  "blind": true
+}

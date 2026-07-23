@@ -1,0 +1,9 @@
+{
+  "version": 1,
+  "instance_id": "tiny5",
+  "status": "valid",
+  "feasible": true,
+  "objective": 44,
+  "reported_objective": 44,
+  "violations": []
+}
