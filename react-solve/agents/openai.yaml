@@ -1,0 +1,4 @@
+interface:
+  display_name: "ReActSolve"
+  short_description: "Build strong general COP solvers with ReAct"
+  default_prompt: "Use $react-solve to build a strong reproducible solver for this batch of combinatorial optimization instances."
